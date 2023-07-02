@@ -88,6 +88,9 @@ func (b *Backup) Start(ctx context.Context, k8sclient client.Client, cluster *ap
 	}
 
 	switch stg.Type {
+	case api.BackupStorageFilesystem:
+		status.Filesystem = &stg.Filesystem
+		status.Destination = stg.Filesystem.Path
 	case api.BackupStorageS3:
 		status.S3 = &stg.S3
 		if stg.S3.Prefix != "" {

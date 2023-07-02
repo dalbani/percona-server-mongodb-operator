@@ -3,6 +3,7 @@ package perconaservermongodbbackup
 import (
 	"context"
 	"fmt"
+	"github.com/percona/percona-backup-mongodb/pbm/storage/fs"
 	"time"
 
 	"github.com/percona/percona-backup-mongodb/pbm/storage"
@@ -232,6 +233,11 @@ func (r *ReconcilePerconaServerMongoDBBackup) reconcile(
 
 func (r *ReconcilePerconaServerMongoDBBackup) getPBMStorage(ctx context.Context, cr *psmdbv1.PerconaServerMongoDBBackup) (storage.Storage, error) {
 	switch {
+	case cr.Status.Filesystem != nil:
+		fsConf := fs.Conf{
+			Path: cr.Status.Filesystem.Path,
+		}
+		return fs.New(fsConf), nil
 	case cr.Status.Azure != nil:
 		if cr.Status.Azure.CredentialsSecret == "" {
 			return nil, errors.New("no azure credentials specified for the secret name")
@@ -350,6 +356,9 @@ func (r *ReconcilePerconaServerMongoDBBackup) checkFinalizers(ctx context.Contex
 
 				var storage psmdbv1.BackupStorageSpec
 				switch {
+				case cr.Status.Filesystem != nil:
+					storage.Type = psmdbv1.BackupStorageFilesystem
+					storage.Filesystem = *cr.Status.Filesystem
 				case cr.Status.S3 != nil:
 					storage.Type = psmdbv1.BackupStorageS3
 					storage.S3 = *cr.Status.S3

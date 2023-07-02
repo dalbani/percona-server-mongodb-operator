@@ -229,6 +229,13 @@ spec:
                   storages:
                     additionalProperties:
                       properties:
+                        filesystem:
+                          properties:
+                            path:
+                              type: string
+                          required:
+                            - path
+                          type: object
                         azure:
                           properties:
                             container:
